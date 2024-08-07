@@ -1,73 +1,108 @@
 import pandas as pd
-from langchain_core.prompts import PromptTemplate
-from langchain.text_splitter import CharacterTextSplitter
-from langchain.chains.summarize import load_summarize_chain
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
+import time
 
 
 class NewsSummarizer:
     def __init__(self, api_key):
         """
-        :param api_key: OpenAI API 키
+        :param api_key: OpenAI API key
         """
-        self.llm = ChatOpenAI(api_key=api_key, model="gpt-4")
+        self.llm = ChatOpenAI(api_key=api_key, model="gpt-3.5-turbo", stream=True)
 
+        # 시스템 메시지로 톤앤 매너 설정
+        self.system_message = (
+            """"
+                당신은 중립적이고 공정한 뉴스 요약자입니다. 모든 뉴스 기사를 200자 내외로 간결하고 명확하게 요약해 주세요.
+                추가 요구사항은 다음과 같습니다.
+                - 요약된 텍스트는 한 문단으로만 구성됩니다.
+                - 문단 앞에는 ● 를 붙여주세요.
+                - 각 문장은 ~니다의 종결 어미를 사용해주세요.
+                
+                예시: ● 증시 폭락의 여파로 정치권에선 내년 1월부터 시행되는 금융투자세를 놓고 격론이 벌어지고 있습니다. 국민의힘은 시장 불안 해소를 위해 당장 폐지를 논의하자고 했지만 민주당은 증시폭락의 책임부터 지라고 맞서고 있습니다. 당 대표 연임이 유력한 이재명 후보는 5년간 5억원까지는 비과세하자는 수정안을 언급했습니다.
+            """
+        )
+
+        # 템플릿 생성
         self.prompt_template = """
-            다음은 뉴스 기사입니다. 기사의 핵심 정보를 간추려서 약 200자 내외로 요약해 주세요. 아래 예시를 참고하여 자연스러운 뉴스 요약 문장으로 작성해 주세요:
+        뉴스 기사:
+        {text}
 
-            예시:
-            ● 전 국민에게 25만원을 지급하자며 야당이 발의한 '25만원 지원법'이 국회 본회의에 상정됐습니다. 국민 모두에게 25만~35만원 범위에서 지역사랑상품권을 지급해 민생을 달래고 경기 회복의 '마중물'로 삼자는 취지의 '특별조치법' 입니다. 국민의힘은 물가와 금리에 악영향을 주는 '현금살포법'이라고 반발하며 또다시 필리버스터에 돌입했습니다.
-            ● 최근 군 정보요원 신상 유출 의혹 사건과 관련해 여야가 간첩법 개정을 두고 공방을 벌이고 있습니다. 국민의힘은 21대 국회에서 민주당 때문에 간첩법 개정안이 통과되지 못했다고 주장했는데, 민주당은 터무니없는 거짓말과 본질을 흐리는 남탓이라며 반발했습니다.
-
-            뉴스 기사:
-            {text}
-
-            요약:
+        요약:
         """
 
-        self.prompt = PromptTemplate(template=self.prompt_template, input_variables=["text"])
+        # ChatPromptTemplate에 시스템 메시지를 포함시킴
+        self.prompt = ChatPromptTemplate.from_messages([
+            ("system", self.system_message),
+            ("human", self.prompt_template)
+        ])
 
     def summarize_content(self, text):
         """
-        주어진 텍스트를 요약하는 함수
+        주어진 텍스트를 요약하는 함수 (실시간 스트리밍으로 출력)
         :param text: 요약할 텍스트
         :return: 요약된 텍스트
         """
-        text_splitter = CharacterTextSplitter(chunk_size=600, chunk_overlap=100)
-        docs = text_splitter.create_documents([text])
+        # 텍스트를 사용하여 프롬프트를 구성
+        formatted_prompt = self.prompt.format(text=text)
+        summary = ""
 
-        summarize_chain = load_summarize_chain(llm=self.llm, chain_type="stuff", verbose=True,
-                                               prompt=self.prompt)
-        summary = summarize_chain.run(docs)
-        print(f"summary:{summary}")
+        start_time = time.time()  # 시작 시간 기록
+
+        # 스트리밍된 응답을 실시간으로 출력
+        for token in self.llm.stream(formatted_prompt):
+            content = token.content  # AIMessageChunk의 content 속성을 가져옴
+            print(content, end="", flush=True)  # 실시간으로 콘솔창에 출력
+            summary += content
+
+        elapsed_time = time.time() - start_time  # 경과 시간 계산
+        print(f"\n기사 요약 완료 (소요 시간: {elapsed_time:.2f}초)\n")
+
         return summary
 
     def summarize_articles_from_csv(self, csv_file):
         """
-        CSV 파일에서 뉴스 기사를 읽어와서 요약하는 함수
-        :param csv_file: CSV 파일 경로
-        :return: 요약된 기사 리스트
+        Summarize news articles from a CSV file using ThreadPoolExecutor.
+        :param csv_file: Path to the CSV file
+        :return: List of summarized articles
         """
         df = pd.read_csv(csv_file)
+        total_articles = len(df)
+        print(f"총 {total_articles}개의 기사가 발견되었습니다.")
+
         summaries = []
 
-        for index, row in df.iterrows():
-            article_text = row['main']  # 'main' 컬럼이 기사 본문을 포함한다고 가정
-            summary = self.summarize_content(article_text)
-            summaries.append({
-                "title": row['title'],
-                "date": row['date'],
-                "summary": summary
-            })
+        start_time = time.time()  # 시작 시간 기록
+
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            futures = []
+            for index, row in df.iterrows():
+                article_text = row['main']  # 'main' 컬럼이 기사 본문을 포함한다고 가정
+                futures.append(executor.submit(self.summarize_content, article_text))
+
+            for index, future in tqdm(enumerate(as_completed(futures)), total=total_articles, desc="진행 상황", unit="기사"):
+                summary = future.result()
+                elapsed_time = time.time() - start_time
+
+                summaries.append({
+                    "title": df.loc[index, 'title'],
+                    "date": df.loc[index, 'date'],
+                    "summary": summary,
+                    "elapsed_time": elapsed_time  # 각 기사의 요약에 걸린 시간 추가
+                })
+
+                print(f"기사 {index + 1}/{total_articles} 요약 완료 (소요 시간: {elapsed_time:.2f}초)\n")
 
         return summaries
 
     def save_summaries_to_csv(self, summaries, output_file):
         """
-        요약된 뉴스 기사를 CSV 파일로 저장하는 함수
-        :param summaries: 요약된 기사 리스트
-        :param output_file: 출력할 CSV 파일 경로
+        Save the summarized articles to a CSV file.
+        :param summaries: List of summarized articles
+        :param output_file: Output CSV file path
         """
         summaries_df = pd.DataFrame(summaries)
         summaries_df.to_csv(output_file, index=False, encoding='utf-8-sig')
