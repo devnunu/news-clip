@@ -10,7 +10,21 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/summarized_articles.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/summary_df.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/top_articles.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
