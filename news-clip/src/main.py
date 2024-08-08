@@ -19,7 +19,7 @@ ARTICLE_CSV = 'article_df.csv'
 
 # Word cloud
 OUTPUT_IMAGE = 'wordcloud.png'
-FONT_PATH = os.path.join('font', 'NanumBarunGothic.ttf')
+FONT_PATH = os.path.join('../font', 'NanumBarunGothic.ttf')
 
 # AI Summary
 SUMMARIZED_CSV = 'summarized_articles.csv'
