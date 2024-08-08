@@ -2,6 +2,7 @@ import os
 from scrap import Scrap
 from news_summarizer import NewsSummarizer
 from wordcloud_generator import WordCloudGenerator
+from slack.slack_notifier import SlackNotifier
 import pandas as pd
 
 # 상수 정의
@@ -28,9 +29,14 @@ SUMMARIZED_CSV = os.path.join(OUTPUT_DIR, 'summarized_articles.csv')
 TOP_ARTICLES_CSV = os.path.join(OUTPUT_DIR, 'top_articles.csv')
 TOP_N = 3
 
+# Slack 설정
+SLACK_TOKEN = os.getenv("SLACK_TOKEN")  # 슬랙 API 토큰 (환경 변수에서 가져오도록 설정)
+SLACK_CHANNEL = '#your-channel-name'  # 메시지를 보낼 슬랙 채널 이름
+
 
 def reduce_articles_by_section(input_csv, output_csv, n):
     """
+    해당 메서드는 너무 많은 AI 호출을 줄이기 위해 csv 전처리 용으로 사용하는 테스트 메서드입니다.
     article_df.csv를 불러와서 각 섹션별로 n개의 아이템만 추출한 후, output_csv 파일로 저장합니다.
 
     :param input_csv: 원본 CSV 파일 경로
@@ -73,4 +79,8 @@ if __name__ == "__main__":
 
     # 병합된 summary 내용 출력 및 한줄 평 생성
     merged_content = summarizer.print_merged_content(TOP_ARTICLES_CSV)
-    summary = summarizer.generate_daily_summary(merged_content)
+    one_line_review = summarizer.generate_one_line_review(merged_content)
+
+    # 슬랙 메세지 전송
+    message = merged_content + one_line_review
+    SlackNotifier().send_message(message)

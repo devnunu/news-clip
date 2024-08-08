@@ -175,7 +175,7 @@ class NewsSummarizer:
         print(merged_content)
         return merged_content
 
-    def generate_daily_summary(self, merged_content):
+    def generate_one_line_review(self, merged_content):
         """
         Merged content를 AI에게 보내어 오늘의 뉴스 한줄 평을 생성하는 함수
         :param merged_content: 오늘의 뉴스 요약본이 병합된 텍스트
