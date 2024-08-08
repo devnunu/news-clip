@@ -5,6 +5,7 @@ from konlpy.tag import Okt
 import re
 import random
 from colorsys import hsv_to_rgb
+import os  # 추가: 파일 경로를 처리하기 위해 필요
 
 
 def generate_color_func(hue_min, hue_max):
@@ -22,7 +23,7 @@ def generate_color_func(hue_min, hue_max):
 
 
 class WordCloudGenerator:
-    def __init__(self, csv_file, font_path=None, output_image='wordcloud.png'):
+    def __init__(self, csv_file, font_path=None, output_image='../output/wordcloud.png'):
         self.csv_file = csv_file
         self.font_path = font_path
         self.output_image = output_image

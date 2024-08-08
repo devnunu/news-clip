@@ -1,3 +1,4 @@
+import os  # 추가: 파일 경로를 처리하기 위해 필요
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -14,6 +15,7 @@ class Scrap:
         :param output_csv: 결과를 저장할 CSV 파일 경로
         """
         self.categories = categories
+
         self.output_csv = output_csv
 
     def ex_tag(self, html_content):
@@ -116,5 +118,3 @@ class Scrap:
 
         # DataFrame을 CSV 파일로 저장
         self.save_to_csv(art_df)
-
-
