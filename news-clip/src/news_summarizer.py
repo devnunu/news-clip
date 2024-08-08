@@ -59,17 +59,8 @@ class NewsSummarizer:
         summaries = []
 
         for i, split_text in enumerate(split_texts):
-            # print(f"Part {i + 1}/{len(split_texts)} 요약 중...")
-
             formatted_prompt = self.prompt.format(text=split_text)
-            # start_time = time.time()
-
-            # 스트리밍 대신 한 번에 응답을 받도록 변경
             summary = self.llm.invoke(formatted_prompt).content
-
-            # elapsed_time = time.time() - start_time
-            # print(f"파트 {i + 1} 요약 완료 (소요 시간: {elapsed_time:.2f}초)")
-
             summaries.append(summary)
 
         return "\n".join(summaries)
@@ -93,7 +84,6 @@ class NewsSummarizer:
         답변 형식: "기사 1" 또는 "기사 2"
         """
 
-        # 스트리밍 대신 한 번에 응답을 받도록 변경
         response = self.llm.invoke(prompt).content
 
         return article1 if "기사 1" in response else article2
@@ -183,6 +173,43 @@ class NewsSummarizer:
         merged_content = "\n\n".join([f"● {summary}" for summary in top_articles_df['summary'].tolist()])
         print("\nMerged Content:\n")
         print(merged_content)
+        return merged_content
+
+    def generate_daily_summary(self, merged_content):
+        """
+        Merged content를 AI에게 보내어 오늘의 뉴스 한줄 평을 생성하는 함수
+        :param merged_content: 오늘의 뉴스 요약본이 병합된 텍스트
+        :return: AI가 생성한 한줄 평
+        """
+        daily_summary_system_message = (
+            """"
+                요구사항:
+                    - 주어지는 오늘자 뉴스 기사에 대한 감상평을 남겨주세요.
+                    - 모든 뉴스를 언급할 필요는 없습니다. 주요한 뉴스에 대한 평만 남겨도 됩니다.    
+                    - 결과값은 한 문단이어야 합니다.
+                    - 100자를 넘지 않아야 합니다.
+                    - 문장의 어미는 반드시 친근하고 캐주얼한 말투(~군, ~야, ~겠어, ~바래)를 사용해야 합니다.
+                    - 각 문장은 격식 없는 대화체로 작성해야 합니다.
+                    - 뉴스를 기반으로 예상한 전망에 대한 내용을 포함해야 합니다.
+
+                예시 1. 태풍 때문에 사건 사고가 많은 날이군. 대신 태풍으로 인해 날씨가 제법 선선해질듯해
+                예시 2. 전쟁 위험이 점점 심각해지고 있어서 걱정이야. 전쟁이 일어난다면 경제가 침체되고 주가가 폭락할것으로 예상돼
+                예시 3. 올림픽으로 인해 국위 선양에 대한 내용이 많아. 금메달을 꽤 많이 획득해서 한국의 브랜드 가치가 높아질 전망이야 
+                예시 4. 오늘은 IT 와 관련된 호재가 많군. 반도체 관련 주식이 많이 오를듯한데 매수해보는건 어떨까?  
+            """
+        )
+        daily_summary_prompt_template = """
+                {text}
+                """
+        prompt_set = ChatPromptTemplate.from_messages([
+            ("system", daily_summary_system_message),
+            ("human", daily_summary_prompt_template)
+        ])
+        prompt = prompt_set.format(text=merged_content)
+        summary = self.llm.invoke(prompt).content
+        print("\n오늘의 뉴스 한줄 평:\n")
+        print(summary)
+        return summary
 
     def print_progress_bar(self, work, completed, total, bar_length=40):
         """

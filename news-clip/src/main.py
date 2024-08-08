@@ -67,9 +67,10 @@ if __name__ == "__main__":
     # 뉴스 요약 작업
     summarizer = NewsSummarizer(api_key=API_KEY)
 
-    top_articles = summarizer.summarize_and_select_top_articles(ARTICLE_CSV, SUMMARIZED_CSV, TOP_ARTICLES_CSV,
-                                                                top_n=TOP_N)
-    print(f"\033[95m뉴스 요약 및 중요 기사 선별 완료.\033[0m")
+    # summarizer.summarize_and_select_top_articles(ARTICLE_CSV, SUMMARIZED_CSV, TOP_ARTICLES_CSV,
+    #                                                             top_n=TOP_N)
+    # print(f"\033[95m뉴스 요약 및 중요 기사 선별 완료.\033[0m")
 
-    # 병합된 summary 내용 출력
-    summarizer.print_merged_content(TOP_ARTICLES_CSV)
+    # 병합된 summary 내용 출력 및 한줄 평 생성
+    merged_content = summarizer.print_merged_content(TOP_ARTICLES_CSV)
+    summary = summarizer.generate_daily_summary(merged_content)
