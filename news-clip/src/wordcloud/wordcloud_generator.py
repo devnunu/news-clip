@@ -62,6 +62,7 @@ class WordCloudGenerator:
         return ' '.join(nouns)
 
     def generate_wordcloud(self):
+        print(f"\033[95m워드 클라우드 이미지 생성중...\033[0m")
         # CSV 파일에서 데이터 불러오기
         df = pd.read_csv(self.csv_file)
 
@@ -80,10 +81,10 @@ class WordCloudGenerator:
 
         # 워드 클라우드 이미지 파일로 저장
         wordcloud.to_file(self.output_image)
-        print(f"워드 클라우드 이미지가 {self.output_image} 파일로 저장되었습니다.")
+        print(f"\033[95m워드 클라우드 이미지가 {self.output_image} 파일로 저장되었습니다.\033[0m")
 
         # 워드 클라우드 출력 (옵션)
-        plt.figure(figsize=(10, 5))
-        plt.imshow(wordcloud, interpolation='bilinear')
-        plt.axis("off")
-        plt.show()
+        # plt.figure(figsize=(10, 5))
+        # plt.imshow(wordcloud, interpolation='bilinear')
+        # plt.axis("off")
+        # plt.show()
