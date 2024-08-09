@@ -10,6 +10,7 @@ import pandas as pd
 
 # 상수 정의
 API_KEY = os.getenv("OPENAI_API_KEY")
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../output')
 
 # Scrape
@@ -64,18 +65,18 @@ if __name__ == "__main__":
     scraper.scrap(max_workers=10)
 
     """
-    스크래핑 결과 전처리 - 섹션별로 20개의 기사만 추출합니다. 
+    스크래핑 결과 전처리 - 섹션별로 20개의 기사만 추출합니다.
     """
-    reduce_articles_by_section(ARTICLE_CSV, ARTICLE_CSV, 20)
+    reduce_articles_by_section(ARTICLE_CSV, ARTICLE_CSV, 5)
 
-    """
-    워드 클라우드 이미지 생성
-    """
-    # WordCloudGenerator 클래스 인스턴스 생성
-    wc_generator = WordCloudGenerator(csv_file=ARTICLE_CSV, output_image=OUTPUT_IMAGE, font_path=FONT_PATH)
-
-    # 워드 클라우드 생성 및 출력
-    wc_generator.generate_wordcloud()
+    # """
+    # 워드 클라우드 이미지 생성
+    # """
+    # # WordCloudGenerator 클래스 인스턴스 생성
+    # wc_generator = WordCloudGenerator(csv_file=ARTICLE_CSV, output_image=OUTPUT_IMAGE, font_path=FONT_PATH)
+    #
+    # # 워드 클라우드 생성 및 출력
+    # wc_generator.generate_wordcloud()
 
     """
     뉴스 요약 작업
@@ -104,7 +105,7 @@ if __name__ == "__main__":
     슬랙 메세지 전송
     """
     # SlackNotifier 인스턴스 생성
-    notifier = SlackNotifier()
+    notifier = SlackNotifier(WEBHOOK_URL)
 
     # 오늘의 날짜를 동적으로 생성
     today_date = datetime.now().strftime("%m월 %d일")
