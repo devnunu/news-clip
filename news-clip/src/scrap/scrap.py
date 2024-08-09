@@ -1,10 +1,9 @@
-import os  # 추가: 파일 경로를 처리하기 위해 필요
+import os
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
-
 
 class Scrap:
     HEADERS = {"User-Agent": "Mozilla/5.0"}
@@ -15,7 +14,6 @@ class Scrap:
         :param output_csv: 결과를 저장할 CSV 파일 경로
         """
         self.categories = categories
-
         self.output_csv = output_csv
 
     def ex_tag(self, html_content):
@@ -89,7 +87,10 @@ class Scrap:
             for future in tqdm(as_completed(futures), total=len(futures), desc="Scraping Articles"):
                 try:
                     art_dic = future.result()
-                    art_dic["section"] = [section for section, urls in all_hrefs.items() if art_dic["url"] in urls][0]
+                    section_code = [section for section, urls in all_hrefs.items() if art_dic["url"] in urls][0]
+                    section_name = [key for key, value in self.categories.items() if int(value) == section_code][0]
+                    art_dic["section"] = section_code
+                    art_dic["section_name"] = section_name  # 섹션 이름 추가
                     artdic_lst.append(art_dic)
                 except Exception as e:
                     print(f"Error scraping article: {e}")
@@ -110,7 +111,7 @@ class Scrap:
         # 모든 섹션의 링크 수집
         all_hrefs = self.collect_all_hrefs()
 
-        # 모든 섹션의 데이터 수집 (제목, 날짜, 본문, section, url)
+        # 모든 섹션의 데이터 수집 (제목, 날짜, 본문, section, section_name, url)
         artdic_lst = self.collect_articles(all_hrefs, max_workers=max_workers)
 
         # DataFrame 생성

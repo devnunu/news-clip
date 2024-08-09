@@ -4,7 +4,6 @@ import threading
 from langchain_openai import ChatOpenAI
 import time
 
-
 class NewsFilter:
     def __init__(self, api_key):
         self.llm = ChatOpenAI(api_key=api_key, model="gpt-3.5-turbo", temperature=0)
@@ -35,12 +34,12 @@ class NewsFilter:
     def filter_top_articles(self, summarized_csv, output_csv, top_n=3):
         start_time = time.time()
         summaries_df = pd.read_csv(summarized_csv)
-        total_sections = summaries_df['section'].nunique()
+        total_sections = summaries_df['section_code'].nunique()
         total_items = total_sections * top_n
         print(f"총 {total_sections}개의 섹션에서 {total_items}개의 기사를 선별할 예정입니다.")
 
         top_articles = []
-        grouped_df = summaries_df.groupby('section')
+        grouped_df = summaries_df.groupby('section_code')
 
         for section, group in grouped_df:
             print(f"섹션 {section}의 중요한 기사 선택 중...")
@@ -74,13 +73,22 @@ class NewsFilter:
 
     def print_merged_content(self, top_articles_csv):
         """
-        top_articles.csv 파일의 summary 열을 가져와서 문자열로 병합한 후 반환합니다.
+        top_articles.csv 파일의 summary 열을 가져와서 섹션별로 문자열로 병합한 후 반환합니다.
         :param top_articles_csv: 최종 선택된 기사가 저장된 CSV 파일 경로
-        :return: 병합된 summary 내용 (문자열)
+        :return: 섹션별로 병합된 summary 내용 (문자열)
         """
         top_articles_df = pd.read_csv(top_articles_csv)
 
-        # 'summary' 열의 각 항목 앞에 ●를 추가하고 "\n\n"으로 구분하여 하나의 문자열로 병합
-        merged_content = "\n\n".join([f"● {summary}" for summary in top_articles_df['summary'].tolist()])
+        # 섹션별로 그룹화하여 섹션 이름과 함께 summary를 병합
+        sections = top_articles_df['section_name'].unique()  # 'section_name'으로 그룹화
 
-        return merged_content
+        merged_content = []
+        for section in sections:
+            merged_content.append(f"\n\n*[{section}]*")  # 섹션 이름 추가
+            section_articles = top_articles_df[top_articles_df['section_name'] == section]['summary'].tolist()
+            merged_content.extend([f"● {summary}" for summary in section_articles])
+
+        # 전체를 "\n\n"으로 구분하여 하나의 문자열로 병합
+        final_content = "\n\n".join(merged_content)
+
+        return final_content

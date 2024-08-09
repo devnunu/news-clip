@@ -8,7 +8,6 @@ from langchain_openai import ChatOpenAI
 from langchain.text_splitter import CharacterTextSplitter
 from openai import RateLimitError
 
-
 class NewsSummarizer:
     def __init__(self, api_key):
         self.llm = ChatOpenAI(api_key=api_key, model="gpt-3.5-turbo", temperature=0)
@@ -22,7 +21,7 @@ class NewsSummarizer:
                     - 한국어 맞춤법과 띄어쓰기를 지켜야합니다.
 
                 강력한 주의: 위의 조건을 지키지 않는 요약은 무효화됩니다.
-                
+
                 예시 1: 가상화폐의 대장주 비트코인이 미국 고용시장 지표 개선 조짐에 환호하며 급등하고 있습니다. 미국 가상화폐 거래소 코인베이스에 따르면 현지시간 8일 비트코인 1개당 가격이 24시간 전보다 6.27% 급등한 우리 돈 약 8천만 원에 거래됐습니다.
                 예시 2: 1945년 8월 15일이 광복절이 아니라고 주장한 김형석 신임 독립기념관장이 어제 취임했습니다. 독립유공자 후손들의 격한 항의 속에서도 취임하자마자, 친일파로 매도된 인사들 명예 회복에 힘쓰겠다고 선언했습니다.
                 예시 3: 최근 전기차 화재와 관련해 불안감이 높아지는 가운데 정부가 전기차 배터리 정보를 공개하도록 하는 방안을 검토하고 있습니다. 국토부는 오늘 국내 완성차 제조사 등과 회의를 열어 관련 입장을 들을 예정입니다.
@@ -57,11 +56,10 @@ class NewsSummarizer:
                     summary = self.llm.invoke(formatted_prompt).content
                     summaries.append(summary)
                     break  # 성공하면 반복 종료
-                except RateLimitError as e:
+                except RateLimitError:
                     retry_attempts += 1
                     wait_time = min(2 ** retry_attempts, 60)  # 지수적 백오프
-                    print(
-                        f"Rate limit exceeded, retrying in {wait_time} seconds... (Attempt {retry_attempts}/{max_attempts})")
+                    print(f"Rate limit exceeded, retrying in {wait_time} seconds... (Attempt {retry_attempts}/{max_attempts})")
                     time.sleep(wait_time)
             else:
                 raise RuntimeError(f"Failed to summarize content after {max_attempts} attempts due to rate limits.")
@@ -92,7 +90,8 @@ class NewsSummarizer:
                 summaries.append({
                     "title": df.loc[self.summary_completed_pages - 1, 'title'],
                     "date": df.loc[self.summary_completed_pages - 1, 'date'],
-                    "section": df.loc[self.summary_completed_pages - 1, 'section'],
+                    "section_code": df.loc[self.summary_completed_pages - 1, 'section'],
+                    "section_name": df.loc[self.summary_completed_pages - 1, 'section_name'],  # section_name 추가
                     "summary": summary
                 })
 

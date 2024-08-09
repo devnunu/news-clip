@@ -17,6 +17,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/output/top_articles.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
       </map>
     </option>
   </component>

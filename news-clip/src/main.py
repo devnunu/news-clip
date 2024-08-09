@@ -114,8 +114,10 @@ if __name__ == "__main__":
     message = f"*:hatched_chick:  [깐추리가 알려주는 {today_date} 간추린 아침뉴스]*\n\n"
 
     # 합칠 내용들 가져오기 (예: merged_content 및 one_line_review)
-    one_line_review_formatted = f"*:baby_chick: [깐추리의 한줄평]*\n\n*_{one_line_review}_*"
+    one_line_review_formatted = f"*:baby_chick: [깐추리의 뉴스 요약!]*\n\n*_{one_line_review}_*"
     final_message = message + merged_content + "\n\n\n" + one_line_review_formatted
 
     # 메시지와 함께 이미지 전송
     notifier.send_message(final_message)
+    print("\033[92m뉴스 요약 작업 완료\033[0m")
+
