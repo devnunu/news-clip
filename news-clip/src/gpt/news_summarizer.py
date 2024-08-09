@@ -75,12 +75,10 @@ class NewsSummarizer:
         summaries = []
 
         with ThreadPoolExecutor(max_workers=7) as executor:
-            futures = []
-            for _, row in df.iterrows():
-                article_text = row['main']
-                futures.append(executor.submit(self.summarize_content, article_text))
+            futures = {executor.submit(self.summarize_content, row['main']): i for i, row in df.iterrows()}
 
             for future in as_completed(futures):
+                i = futures[future]
                 summary = future.result()
 
                 with self.lock:
@@ -88,10 +86,10 @@ class NewsSummarizer:
                     print_progress_bar("요약", self.summary_completed_pages, total_articles)
 
                 summaries.append({
-                    "title": df.loc[self.summary_completed_pages - 1, 'title'],
-                    "date": df.loc[self.summary_completed_pages - 1, 'date'],
-                    "section_code": df.loc[self.summary_completed_pages - 1, 'section'],
-                    "section_name": df.loc[self.summary_completed_pages - 1, 'section_name'],  # section_name 추가
+                    "title": df.loc[i, 'title'],
+                    "date": df.loc[i, 'date'],
+                    "section_code": df.loc[i, 'section'],
+                    "section_name": df.loc[i, 'section_name'],
                     "summary": summary
                 })
 
@@ -100,4 +98,4 @@ class NewsSummarizer:
         print(f"\033[95m기사 요약이 완료되었습니다. 요약본이 {summarized_csv}에 저장되었습니다.\033[0m")
 
         elapsed_time = time.time() - start_time
-        print(f"\033[95m요약 작업이 완료되었습니다. 총 소요 시간: {elapsed_time:.2f}초\033[0m")
+        print(f"\033[92m요약 작업이 완료되었습니다. 총 소요 시간: {elapsed_time:.2f}초\033[0m")

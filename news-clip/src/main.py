@@ -67,16 +67,16 @@ if __name__ == "__main__":
     """
     스크래핑 결과 전처리 - 섹션별로 20개의 기사만 추출합니다.
     """
-    reduce_articles_by_section(ARTICLE_CSV, ARTICLE_CSV, 5)
+    reduce_articles_by_section(ARTICLE_CSV, ARTICLE_CSV, 10)
 
-    # """
-    # 워드 클라우드 이미지 생성
-    # """
-    # # WordCloudGenerator 클래스 인스턴스 생성
-    # wc_generator = WordCloudGenerator(csv_file=ARTICLE_CSV, output_image=OUTPUT_IMAGE, font_path=FONT_PATH)
-    #
-    # # 워드 클라우드 생성 및 출력
-    # wc_generator.generate_wordcloud()
+    """
+    워드 클라우드 이미지 생성
+    """
+    # WordCloudGenerator 클래스 인스턴스 생성
+    wc_generator = WordCloudGenerator(csv_file=ARTICLE_CSV, output_image=OUTPUT_IMAGE, font_path=FONT_PATH)
+
+    # 워드 클라우드 생성 및 출력
+    wc_generator.generate_wordcloud()
 
     """
     뉴스 요약 작업

@@ -42,7 +42,8 @@ class NewsFilter:
         grouped_df = summaries_df.groupby('section_code')
 
         for section, group in grouped_df:
-            print(f"섹션 {section}의 중요한 기사 선택 중...")
+            section_name = group['section_name'].iloc[0]  # 그룹의 첫 번째 행에서 section_name 가져오기
+            print(f"[{section_name}] 섹션의 중요한 기사 선택 중...")
 
             articles = group.to_dict('records')
             selected_articles = []
