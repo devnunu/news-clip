@@ -19,4 +19,7 @@ jobs:
       run: pip install -r requirements.txt
 
     - name: Run script
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
       run: python main.py  # main.py가 위치한 경로 지정
