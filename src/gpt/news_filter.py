@@ -85,7 +85,7 @@ class NewsFilter:
 
         merged_content = []
         for section in sections:
-            merged_content.append(f"\n\n*[{section}]*")  # 섹션 이름 추가
+            merged_content.append(f"\n*[{section}]*")  # 섹션 이름 추가
             section_articles = top_articles_df[top_articles_df['section_name'] == section]['summary'].tolist()
             merged_content.extend([f"● {summary}" for summary in section_articles])
 
