@@ -1,0 +1,23 @@
+name: Run main.py daily at 8 AM KST
+
+on:
+  schedule:
+    - cron: "0 23 * * *"  # 매일 오후 11시 UTC (한국 시간 오전 8시)
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.11'  # Python 버전 지정
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Run script
+      run: python main.py  # main.py가 위치한 경로 지정
