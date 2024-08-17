@@ -7,6 +7,10 @@ from src.wordcloud.wordcloud_generator import WordCloudGenerator
 from src.slack.slack_notifier import SlackNotifier
 from datetime import datetime
 import pandas as pd
+import pytz
+
+# 한국 시간(KST) 타임존 설정
+kst = pytz.timezone('Asia/Seoul')
 
 # 상수 정의
 API_KEY = os.getenv("OPENAI_API_KEY")
@@ -108,7 +112,7 @@ if __name__ == "__main__":
     notifier = SlackNotifier(WEBHOOK_URL)
 
     # 오늘의 날짜를 동적으로 생성
-    today_date = datetime.now().strftime("%m월 %d일")
+    today_date = datetime.now(kst).strftime("%m월 %d일")
 
     # 기본 메시지 텍스트 생성
     message = f"*:hatched_chick:  [깐추리가 알려주는 {today_date} 간추린 아침뉴스]*\n\n"
