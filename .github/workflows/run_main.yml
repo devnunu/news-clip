@@ -1,26 +1,26 @@
-name: Run main.py daily at 8 AM KST
+# name: Run main.py daily at 8 AM KST
 
-on:
-  schedule:
-    - cron: "0 23 * * *"  # 매일 오후 11시 UTC (한국 시간 오전 8시)
+# on:
+#   schedule:
+#     - cron: "0 23 * * *"  # 매일 오후 11시 UTC (한국 시간 오전 8시)
 
-jobs:
-  run-script:
-    runs-on: ubuntu-latest
+# jobs:
+#   run-script:
+#     runs-on: ubuntu-latest
 
-    steps:
-    - uses: actions/checkout@v2
+#     steps:
+#     - uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.11'  # Python 버전 지정
+#     - name: Set up Python
+#       uses: actions/setup-python@v2
+#       with:
+#         python-version: '3.11'  # Python 버전 지정
 
-    - name: Install dependencies
-      run: pip install -r requirements.txt
+#     - name: Install dependencies
+#       run: pip install -r requirements.txt
 
-    - name: Run script
-      env:
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
-      run: python main.py  # main.py가 위치한 경로 지정
+#     - name: Run script
+#       env:
+#         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+#         WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+#       run: python main.py  # main.py가 위치한 경로 지정
